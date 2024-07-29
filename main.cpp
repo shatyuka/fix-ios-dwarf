@@ -123,12 +123,13 @@ int main(int argc, char* argv[]) {
     macho_section.addr = section.address;
     macho_section.offset = section.offset;
     macho_section.size = section.size;
-    snprintf(macho_section.segname, sizeof(macho_section.segname), "__DWARF");
-    snprintf(macho_section.sectname, sizeof(macho_section.sectname), "%s", section.name.c_str());
+    strncpy(macho_section.segname, "__DWARF", sizeof(macho_section.segname));
+    strncpy(macho_section.sectname, section.name.c_str(), sizeof(macho_section.sectname));
     output_fs.write((char*)&macho_section, sizeof(macho_section));
   }
 
-  const auto intersection_size = dwarf_section_data_offset - input_fs.tellg() - sizeof(section_64) * dwarf_section_list.size();
+  input_fs.seekg(sizeof(section_64) * dwarf_section_list.size(), std::ios::cur);
+  const auto intersection_size = dwarf_section_data_offset - input_fs.tellg();
   fs_copy_some(input_fs, output_fs, intersection_size);
 
   for (auto& section : dwarf_section_list) {
